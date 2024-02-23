@@ -154,7 +154,6 @@ class SiteController extends Controller
         }
         $query = @$telegram->input->callback_query;
         if ($query) {
-
             $data = json_decode($query->data, true);
             if (Polls::find()->where([
                 'vote_id' => $data['vote'],
@@ -164,34 +163,34 @@ class SiteController extends Controller
                     'callback_query_id' => $query->id,
                     'text' => "Siz oldinroq ovoz bergansiz"
                 ]);
-                exit();
-            }
-            $poll = new Polls();
-            $poll->vote_id = $data['vote'];
-            $poll->button_id = $data['button'];
-            $poll->user_id = $query->message['chat']['id'];
-            $poll->save();
-            //add vote count to before button text
-            $buttons = Buttons::find()->where(['vote_id' => $data['vote']])->all();
-            $inline = [];
-            /** @var $button Buttons */
-            foreach ($buttons as $button) {
-                $keyboard = [];
-                $count = Polls::find()->where(['vote_id' => $data['vote'], 'button_id' => $button->id])->count();
-                $keyboard[] = ['text' => $button->text . " [" . $count . ']', 'callback_data' => json_encode(['vote' => $button->vote_id, 'button' => $button->id])];
-                $inline[] = $keyboard;
-            }
-            $telegram->editMessageText([
-                'chat_id' => $query->message['chat']['id'],
-                'message_id' => $query->message['message_id'],
-                'text' => "Sizning ovozingiz qabul qilindi".time(),
-                'reply_markup' => json_encode([
-                    'inline_keyboard' =>
-                        $inline
-                ]),
 
-            ]);
+            } else {
 
+                $poll = new Polls();
+                $poll->vote_id = $data['vote'];
+                $poll->button_id = $data['button'];
+                $poll->user_id = $query->message['chat']['id'];
+                $poll->save();
+                //add vote count to before button text
+                $buttons = Buttons::find()->where(['vote_id' => $data['vote']])->all();
+                $inline = [];
+                /** @var $button Buttons */
+                foreach ($buttons as $button) {
+                    $keyboard = [];
+                    $count = Polls::find()->where(['vote_id' => $data['vote'], 'button_id' => $button->id])->count();
+                    $keyboard[] = ['text' => $button->text . " [" . $count . ']', 'callback_data' => json_encode(['vote' => $button->vote_id, 'button' => $button->id])];
+                    $inline[] = $keyboard;
+                }
+                $telegram->editMessageText([
+                    'chat_id' => $query->message['chat']['id'],
+                    'message_id' => $query->message['message_id'],
+                    'text' => "Sizning ovozingiz qabul qilindi" . time(),
+                    'reply_markup' => json_encode([
+                        'inline_keyboard' =>
+                            $inline
+                    ]),
+                ]);
+            }
         }
 
     }
@@ -201,7 +200,8 @@ class SiteController extends Controller
      *
      * @return Response|string
      */
-    public function actionLogin()
+    public
+    function actionLogin()
     {
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
@@ -223,7 +223,8 @@ class SiteController extends Controller
      *
      * @return Response
      */
-    public function actionLogout()
+    public
+    function actionLogout()
     {
         Yii::$app->user->logout();
 
@@ -235,7 +236,8 @@ class SiteController extends Controller
      *
      * @return Response|string
      */
-    public function actionContact()
+    public
+    function actionContact()
     {
         $model = new ContactForm();
         if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
@@ -253,7 +255,8 @@ class SiteController extends Controller
      *
      * @return string
      */
-    public function actionAbout()
+    public
+    function actionAbout()
     {
         return $this->render('about');
     }
