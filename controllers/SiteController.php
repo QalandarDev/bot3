@@ -59,24 +59,17 @@ class SiteController extends Controller
      *
      * @void
      */
-    public function actionIndex():void
+    public function actionIndex(Request $request):void
     {
-        $json=[
-            'text' => 'this is test',
-            'vote' => 'yes',
-        ];
+        $telegram = Yii::$app->telegram;
+        $text= $telegram->input->message->text;
+        if($text === '/start'){
 
-        Yii::$app->telegram->sendMessage([
-            'chat_id' => 354742944,
-            'text' => 'this is test',
-            'reply_markup' => json_encode([
-                'inline_keyboard' => [
-                    [
-                        ['text' => "refresh", 'callback_data' => time()]
-                    ]
-                ]
-            ]),
-        ]);
+            $telegram->sendMessage([
+                'chat_id' => $telegram->input->message->chat->id,
+                'text' => 'Welcome to my bot'
+            ]);
+        }
     }
 
     /**
