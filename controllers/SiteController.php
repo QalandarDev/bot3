@@ -158,7 +158,6 @@ class SiteController extends Controller
             $data = json_decode($query->data, true);
             if (Polls::find()->where([
                 'vote_id' => $data['vote'],
-                'button_id' => $data['button'],
                 'user_id' => $query->message['chat']['id']
             ])->exists()) {
                 $telegram->answerCallbackQuery([
