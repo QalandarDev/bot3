@@ -165,6 +165,7 @@ class SiteController extends Controller
                     'callback_query_id' => $query->id,
                     'text' => "Siz oldinroq ovoz bergansiz"
                 ]);
+                exit();
             }
             $poll = new Polls();
             $poll->vote_id = $data['vote'];
