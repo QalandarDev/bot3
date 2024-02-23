@@ -161,11 +161,11 @@ class SiteController extends Controller
             ])->exists()) {
                 $telegram->answerCallbackQuery([
                     'callback_query_id' => $query->id,
-                    'text' => "Siz oldinroq ovoz bergansiz"
+                    'text' => "Siz oldinroq ovoz bergansiz",
+                    'show_alert' => true
                 ]);
 
             } else {
-
                 $poll = new Polls();
                 $poll->vote_id = $data['vote'];
                 $poll->button_id = $data['button'];
