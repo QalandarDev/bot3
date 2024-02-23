@@ -14,7 +14,7 @@ $config = [
     'components' => [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => '',
+            'cookieValidationKey' => '123',
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -40,6 +40,10 @@ $config = [
                     'levels' => ['error', 'warning'],
                 ],
             ],
+        ],
+        'telegram' => [
+            'class' => 'aki\telegram\Telegram',
+            'botToken' => '7049664457:AAEva5Tt0mrBPWJv8tuJLY7cKxXmd789i2Q',
         ],
         'db' => $db,
         /*

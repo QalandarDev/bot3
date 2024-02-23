@@ -57,11 +57,26 @@ class SiteController extends Controller
     /**
      * Displays homepage.
      *
-     * @return string
+     * @void
      */
-    public function actionIndex()
+    public function actionIndex():void
     {
-        return $this->render('index');
+        $json=[
+            'text' => 'this is test',
+            'vote' => 'yes',
+        ];
+
+        Yii::$app->telegram->sendMessage([
+            'chat_id' => 354742944,
+            'text' => 'this is test',
+            'reply_markup' => json_encode([
+                'inline_keyboard' => [
+                    [
+                        ['text' => "refresh", 'callback_data' => time()]
+                    ]
+                ]
+            ]),
+        ]);
     }
 
     /**
