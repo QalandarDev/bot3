@@ -70,7 +70,6 @@ class SiteController extends Controller
                 'text' => 'Welcome to my bot'
             ]);
         }
-        dd($telegram);
     }
 
     /**
