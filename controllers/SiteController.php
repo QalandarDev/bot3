@@ -156,16 +156,16 @@ class SiteController extends Controller
         if ($query) {
 
             $data = json_decode($query->data, true);
-//            if (Polls::find()->where([
-//                'vote_id' => $data['vote'],
-//                'button_id' => $data['button'],
-//                'user_id' => $query->message['chat']['id']
-//            ])->exists()) {
-//                $telegram->answerCallbackQuery([
-//                    'callback_query_id' => $query->id,
-//                    'text' => "Siz oldinroq ovoz bergansiz"
-//                ]);
-//            }
+            if (Polls::find()->where([
+                'vote_id' => $data['vote'],
+                'button_id' => $data['button'],
+                'user_id' => $query->message['chat']['id']
+            ])->exists()) {
+                $telegram->answerCallbackQuery([
+                    'callback_query_id' => $query->id,
+                    'text' => "Siz oldinroq ovoz bergansiz"
+                ]);
+            }
             $poll = new Polls();
             $poll->vote_id = $data['vote'];
             $poll->button_id = $data['button'];
@@ -181,10 +181,6 @@ class SiteController extends Controller
                 $keyboard[] = ['text' => $button->text . " [" . $count . ']', 'callback_data' => json_encode(['vote' => $button->vote_id, 'button' => $button->id])];
                 $inline[] = $keyboard;
             }
-            $telegram->answerCallbackQuery([
-                'callback_query_id' => $query->id,
-                'text' => "Sizning ovozingiz qabul qilindi"
-            ]);
             $telegram->editMessageText([
                 'chat_id' => $query->message['chat']['id'],
                 'message_id' => $query->message['message_id'],
