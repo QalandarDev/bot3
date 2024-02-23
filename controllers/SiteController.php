@@ -59,7 +59,7 @@ class SiteController extends Controller
      *
      * @void
      */
-    public function actionIndex(Request $request):void
+    public function actionIndex():void
     {
         $telegram = Yii::$app->telegram;
         $text= $telegram->input->message->text;
@@ -70,6 +70,7 @@ class SiteController extends Controller
                 'text' => 'Welcome to my bot'
             ]);
         }
+        dd($telegram);
     }
 
     /**
