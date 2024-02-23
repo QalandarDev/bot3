@@ -156,21 +156,41 @@ class SiteController extends Controller
         if ($query) {
 
             $data = json_decode($query->data, true);
-            if (Polls::find()->where([
-                'vote_id' => $data['vote'],
-                'button_id' => $data['button'],
-                'user_id' => $query->message['chat']['id']
-            ])->exists()) {
-                $telegram->answerCallbackQuery([
-                    'callback_query_id' => $query->id,
-                    'text' => "Siz oldinroq ovoz bergansiz"
-                ]);
-            }
+//            if (Polls::find()->where([
+//                'vote_id' => $data['vote'],
+//                'button_id' => $data['button'],
+//                'user_id' => $query->message['chat']['id']
+//            ])->exists()) {
+//                $telegram->answerCallbackQuery([
+//                    'callback_query_id' => $query->id,
+//                    'text' => "Siz oldinroq ovoz bergansiz"
+//                ]);
+//            }
             $poll = new Polls();
             $poll->vote_id = $data['vote'];
             $poll->button_id = $data['button'];
             $poll->user_id = $query->message['chat']['id'];
             $poll->save();
+            //add vote count to before button text
+            $buttons = Buttons::find()->where(['vote_id' => $data['vote']])->all();
+            $inline = [];
+            /** @var $button Buttons */
+            foreach ($buttons as $button) {
+                $keyboard=[];
+                $count = Polls::find()->where(['vote_id' => $data['vote'], 'button_id' => $button->id])->count();
+                $keyboard[] = ['text' => $button->name . " " . $count, 'callback_data' => json_encode(['vote' => $data['vote'], 'button' => $button->id])];
+                $inline[] = $keyboard;
+            }
+            $telegram->editMessageText([
+                'chat_id' => $query->message['chat']['id'],
+                'message_id' => $query->message['message_id'],
+                'text' => "Sizning ovozingiz qabul qilindi",
+                'reply_markup' => json_encode([
+                    'inline_keyboard' =>
+                        $inline
+                ]),
+
+            ]);
             $telegram->answerCallbackQuery([
                 'callback_query_id' => $query->id,
                 'text' => "Sizning ovozingiz qabul qilindi"
