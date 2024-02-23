@@ -2,8 +2,12 @@
 
 namespace app\controllers;
 
+use aki\telegram\types\Poll;
+use app\models\Buttons;
+use app\models\Polls;
 use Yii;
 use yii\filters\AccessControl;
+use yii\helpers\Json;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
@@ -60,18 +64,119 @@ class SiteController extends Controller
      * @void
      */
 
-    public $enableCsrfValidation=false;
-    public function actionIndex():void
-    {
-        $telegram = Yii::$app->telegram;
-        $text= $telegram->input->message->text;
-        if($text === '/start'){
+    const ADMIN_ID = 354742944;
+    public $enableCsrfValidation = false;
 
-            $telegram->sendMessage([
-                'chat_id' => $telegram->input->message->chat->id,
-                'text' => 'Welcome to my bot'
+    public function actionIndex(): void
+    {
+
+        $telegram = Yii::$app->telegram;
+        $message = @$telegram->input->message;
+        if ($message) {
+            if ($message->chat->id != self::ADMIN_ID) {
+                exit();
+            }
+            $checkAdmin = \app\models\Admin::findOne($message->chat->id);
+            if (!$checkAdmin) {
+                $admin = new \app\models\Admin();
+                $admin->user_id = $message->chat->id;
+                $admin->save();
+            }
+            $admin = \app\models\Admin::findOne($message->chat->id);
+            if ($admin->step == 3 and $message->text == "/done") {
+                $keyboardText = json_decode($admin->keyboard, true);
+                $vote = new \app\models\Vote();
+                $vote->name = $admin->text;
+                $vote->save();
+
+                $inline = [];
+                foreach ($keyboardText as $btn) {
+                    $voteItem = new Buttons();
+                    $voteItem->vote_id = $vote->id;
+                    $voteItem->text = $btn;
+                    $voteItem->save();
+                    $keyboard = [];
+                    $keyboard[] = ['text' => $btn, 'callback_data' => json_encode(['vote' => $vote->id, 'button' => $voteItem->id])];
+                    $inline[] = $keyboard;
+                }
+                $telegram->sendMessage([
+                    'chat_id' => $message->chat->id,
+                    'text' => "Sizning vote tayyor",
+                    'reply_markup' => json_encode([
+                        'inline_keyboard' =>
+                            $inline
+                    ]),
+                ]);
+//                $admin->step = 0;
+//                $admin->text = '';
+//                $admin->keyboard = '';
+//                $admin->save();
+            }
+            if ($admin->step == 2) {
+                $keyboardTexts = explode(',', $message->text);
+
+                $inline = [];
+                foreach ($keyboardTexts as $keyboardText) {
+                    $keyboard = [];
+                    $keyboard[] = ['text' => $keyboardText, 'callback_data' => time()];
+                    $inline[] = $keyboard;
+                }
+                $admin->step = 3;
+                $admin->keyboard = json_encode($keyboardTexts);
+                $admin->save();
+                $telegram->sendMessage([
+                    'chat_id' => $message->chat->id,
+                    'text' => $admin->text . "\n" . "Klavatura tayyor\n Tasdiqlash /done\nBekor qilish /start",
+                    'reply_markup' => json_encode([
+                        'inline_keyboard' =>
+                            $inline
+                    ]),
+                ]);
+            }
+            if ($admin->step == 1) {
+                $admin->text = $message->text;
+                $admin->step = 2;
+                $admin->save();
+                $telegram->sendMessage([
+                    'chat_id' => $message->chat->id,
+                    'text' => "Klavaturani kiriting"
+                ]);
+            }
+            if ($message->text == "/start" and $admin->step == 0) {
+                $telegram->sendMessage([
+                    'chat_id' => $message->chat->id,
+                    'text' => "Matn kiriting",
+                ]);
+                $admin->step = 1;
+                $admin->save();
+            }
+
+        }
+        $query = @$telegram->input->callback_query;
+        if ($query) {
+
+            $data = json_decode($query->data, true);
+            if (Polls::find()->where([
+                'vote_id' => $data['vote'],
+                'button_id' => $data['button'],
+                'user_id' => $query->message['chat']['id']
+            ])->exists()) {
+                $telegram->answerCallbackQuery([
+                    'callback_query_id' => $query->id,
+                    'text' => "Siz oldinroq ovoz bergansiz"
+                ]);
+            }
+            $poll = new Polls();
+            $poll->vote_id = $data['vote'];
+            $poll->button_id = $data['button'];
+            $poll->user_id = $query->message['chat']['id'];
+            $poll->save();
+            $telegram->answerCallbackQuery([
+                'callback_query_id' => $query->id,
+                'text' => "Sizning ovozingiz qabul qilindi"
             ]);
         }
+
     }
 
     /**
