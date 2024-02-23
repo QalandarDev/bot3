@@ -59,6 +59,8 @@ class SiteController extends Controller
      *
      * @void
      */
+
+    public $enableCsrfValidation=false;
     public function actionIndex():void
     {
         $telegram = Yii::$app->telegram;
