@@ -176,11 +176,15 @@ class SiteController extends Controller
             $inline = [];
             /** @var $button Buttons */
             foreach ($buttons as $button) {
-                $keyboard=[];
+                $keyboard = [];
                 $count = Polls::find()->where(['vote_id' => $data['vote'], 'button_id' => $button->id])->count();
-                $keyboard[] = ['text' => $button->text . " " . $count, 'callback_data' => json_encode(['vote' => $data['vote'], 'button' => $button->id])];
+                $keyboard[] = ['text' => $button->text . " [" . $count . ']', 'callback_data' => json_encode(['vote' => $button->vote_id, 'button' => $button->id])];
                 $inline[] = $keyboard;
             }
+            $telegram->answerCallbackQuery([
+                'callback_query_id' => $query->id,
+                'text' => "Sizning ovozingiz qabul qilindi"
+            ]);
             $telegram->editMessageText([
                 'chat_id' => $query->message['chat']['id'],
                 'message_id' => $query->message['message_id'],
@@ -191,10 +195,7 @@ class SiteController extends Controller
                 ]),
 
             ]);
-            $telegram->answerCallbackQuery([
-                'callback_query_id' => $query->id,
-                'text' => "Sizning ovozingiz qabul qilindi"
-            ]);
+
         }
 
     }
