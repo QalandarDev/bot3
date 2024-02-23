@@ -107,10 +107,10 @@ class SiteController extends Controller
                             $inline
                     ]),
                 ]);
-//                $admin->step = 0;
-//                $admin->text = '';
-//                $admin->keyboard = '';
-//                $admin->save();
+                $admin->step = 0;
+                $admin->text = '';
+                $admin->keyboard = '';
+                $admin->save();
             }
             if ($admin->step == 2) {
                 $keyboardTexts = explode(',', $message->text);
@@ -171,7 +171,7 @@ class SiteController extends Controller
                 $poll->button_id = $data['button'];
                 $poll->user_id = $query->message['chat']['id'];
                 $poll->save();
-                //add vote count to before button text
+                //add vote count to before button tex   t
                 $buttons = Buttons::find()->where(['vote_id' => $data['vote']])->all();
                 $inline = [];
                 /** @var $button Buttons */
