@@ -185,7 +185,7 @@ class SiteController extends Controller
             $telegram->editMessageText([
                 'chat_id' => $query->message['chat']['id'],
                 'message_id' => $query->message['message_id'],
-                'text' => "Sizning ovozingiz qabul qilindi",
+                'text' => "Sizning ovozingiz qabul qilindi".time(),
                 'reply_markup' => json_encode([
                     'inline_keyboard' =>
                         $inline
