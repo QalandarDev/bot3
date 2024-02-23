@@ -178,7 +178,7 @@ class SiteController extends Controller
             foreach ($buttons as $button) {
                 $keyboard=[];
                 $count = Polls::find()->where(['vote_id' => $data['vote'], 'button_id' => $button->id])->count();
-                $keyboard[] = ['text' => $button->name . " " . $count, 'callback_data' => json_encode(['vote' => $data['vote'], 'button' => $button->id])];
+                $keyboard[] = ['text' => $button->text . " " . $count, 'callback_data' => json_encode(['vote' => $data['vote'], 'button' => $button->id])];
                 $inline[] = $keyboard;
             }
             $telegram->editMessageText([
